@@ -6,11 +6,14 @@ const dotenv = require("dotenv");
 dotenv.config();
 const app = express();
 
-app.use(express.json()); // Enable JSON parsing
+// ✅ Correct CORS setup (Merge both)
 app.use(cors({
-  origin: ["http://localhost:3000"], // Allow frontend from port 3000
-  credentials: true,
+  origin: ['http://127.0.0.1:5500', 'http://127.0.0.1:5501', 'http://localhost:5500'], // Allow frontend origins
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type']
 }));
+
+app.use(express.json()); // ✅ Ensure JSON body parsing
 
 const port = process.env.PORT || 5000;
 const URL = process.env.MONGO_URI;
@@ -36,9 +39,15 @@ connectDB().then(() => {
 
 // ✅ Import and use post routes
 const postRoutes = require("./routes/posts");
-app.use("/api/posts", postRoutes);  // All post-related routes will be prefixed with /api/posts
+app.use("/api/posts", postRoutes);
 
-// Test Route
+// ✅ CORS Test Route (Check with browser)
+app.get("/cors-test", (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*"); // Force CORS response header
+  res.send("✅ CORS is working!");
+});
+
+// ✅ Test if backend is running
 app.get("/", (req, res) => {
   res.send("✅ Backend is running");
-});   
+});
